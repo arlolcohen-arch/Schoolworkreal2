@@ -78,7 +78,7 @@
       background: #90caf9;
       cursor: not-allowed;
     }
-    #backClash, #backFlappy, #backSubway, #backBlock, #backBasket {
+    #backClash, #backFlappy, #backSubway, #backBlock, #backBasket, #backTetris {
       background: #f44336;
     }
     #status {
@@ -111,7 +111,9 @@
       <button id="btnSubway">Play Subway Surfers</button>
       <button id="btnBlock">Play Block Blast</button>
       <button id="btnBasket">Play Basketball Stars</button>
+      <button id="btnTetris">Play Tetris</button>
     </div>
+    <footer style="margin-top:40px; font-size:14px; color:#555;">Made by Arlo</footer>
   </div>
 
   <!-- CLASH ROYALE PAGE -->
@@ -137,29 +139,36 @@
   <!-- FLAPPY BIRD PAGE -->
   <div id="flappyPage" class="page">
     <h1>Flappy Bird</h1>
-    <iframe src="https://flappybird.io/"></iframe>
+    <iframe src="https://flappybird.io/" title="Flappy Bird"></iframe>
     <button id="backFlappy">← Back to Home</button>
   </div>
 
   <!-- SUBWAY SURFERS PAGE -->
   <div id="subwayPage" class="page">
     <h1>Subway Surfers</h1>
-    <iframe src="https://subwaysurfers.io/"></iframe>
+    <p>Subway Surfers is not embeddable. <a href="https://subwaysurfers.com/" target="_blank" rel="noopener">Click here to play on official site</a>.</p>
     <button id="backSubway">← Back to Home</button>
   </div>
 
   <!-- BLOCK BLAST PAGE -->
   <div id="blockPage" class="page">
     <h1>Block Blast</h1>
-    <iframe src="https://blockblast.io/"></iframe>
+    <p>Block Blast is not embeddable. <a href="https://blockblast.io/" target="_blank" rel="noopener">Click here to play on official site</a>.</p>
     <button id="backBlock">← Back to Home</button>
   </div>
 
   <!-- BASKETBALL STARS PAGE -->
   <div id="basketPage" class="page">
     <h1>Basketball Stars</h1>
-    <iframe src="https://basketballstars.io/"></iframe>
+    <iframe src="https://basketballstars.io/" title="Basketball Stars"></iframe>
     <button id="backBasket">← Back to Home</button>
+  </div>
+
+  <!-- TETRIS PAGE -->
+  <div id="tetrisPage" class="page">
+    <h1>Tetris</h1>
+    <iframe src="https://tetris.com/play-tetris" title="Tetris"></iframe>
+    <button id="backTetris">← Back to Home</button>
   </div>
 
 <script>
@@ -170,6 +179,7 @@
   const subwayPage = document.getElementById('subwayPage');
   const blockPage = document.getElementById('blockPage');
   const basketPage = document.getElementById('basketPage');
+  const tetrisPage = document.getElementById('tetrisPage');
 
   // Buttons to open pages
   document.getElementById('btnClash').addEventListener('click', () => {
@@ -180,6 +190,7 @@
   document.getElementById('btnSubway').addEventListener('click', () => showPage('subway'));
   document.getElementById('btnBlock').addEventListener('click', () => showPage('block'));
   document.getElementById('btnBasket').addEventListener('click', () => showPage('basket'));
+  document.getElementById('btnTetris').addEventListener('click', () => showPage('tetris'));
 
   // Back buttons
   document.getElementById('backClash').addEventListener('click', () => {
@@ -190,6 +201,7 @@
   document.getElementById('backSubway').addEventListener('click', () => showPage('home'));
   document.getElementById('backBlock').addEventListener('click', () => showPage('home'));
   document.getElementById('backBasket').addEventListener('click', () => showPage('home'));
+  document.getElementById('backTetris').addEventListener('click', () => showPage('home'));
 
   function showPage(pageName) {
     homePage.classList.remove('active');
@@ -198,12 +210,14 @@
     subwayPage.classList.remove('active');
     blockPage.classList.remove('active');
     basketPage.classList.remove('active');
+    tetrisPage.classList.remove('active');
     if (pageName === 'home') homePage.classList.add('active');
     else if (pageName === 'clash') clashPage.classList.add('active');
     else if (pageName === 'flappy') flappyPage.classList.add('active');
     else if (pageName === 'subway') subwayPage.classList.add('active');
     else if (pageName === 'block') blockPage.classList.add('active');
     else if (pageName === 'basket') basketPage.classList.add('active');
+    else if (pageName === 'tetris') tetrisPage.classList.add('active');
   }
 
   // ----------------------------
@@ -245,6 +259,7 @@
     if (gameOver) return;
 
     playerUnits.forEach((unit, i) => {
+      if (!unit.style.left) unit.style.left = '70px';
       const currentLeft = parseInt(unit.style.left);
       if (currentLeft >= 350) {
         enemyTower.hp--;
@@ -257,6 +272,7 @@
     });
 
     enemyUnits.forEach((unit, i) => {
+      if (!unit.style.right) unit.style.right = '70px';
       const currentRight = parseInt(unit.style.right);
       if (currentRight >= 350) {
         playerTower.hp--;
@@ -268,10 +284,11 @@
       unit.style.right = currentRight + 1 + 'px';
     });
 
-    for (let i = 0; i < playerUnits.length; i++) {
+    // Combat
+    for (let i = playerUnits.length - 1; i >= 0; i--) {
       const pUnit = playerUnits[i];
       const pPos = parseInt(pUnit.style.left);
-      for (let j = 0; j < enemyUnits.length; j++) {
+      for (let j = enemyUnits.length -1; j >= 0; j--) {
         const eUnit = enemyUnits[j];
         const ePos = 400 - parseInt(eUnit.style.right);
         if (Math.abs(pPos - ePos) < 30) {
@@ -321,69 +338,54 @@
     document.getElementById('enemyUnits').appendChild(unit);
   }
 
-  function startClashGame() {
-    playerTower.hp = 10;
-    enemyTower.hp = 10;
-    playerElixir = 10;
-    gameOver = false;
-    messageDiv.textContent = '';
-    updateStatus();
-
-    playerUnits.forEach(u => u.remove());
-    enemyUnits.forEach(u => u.remove());
-    playerUnits = [];
-    enemyUnits = [];
-
-    document.querySelectorAll('#controls button[data-type]').forEach(btn => btn.disabled = false);
-
-    elixirInterval = setInterval(() => {
-      if (gameOver) return;
-      if (playerElixir < maxElixir) {
-        playerElixir++;
-        updateStatus();
-      }
-    }, 1000);
-
-    enemySpawnInterval = setInterval(spawnEnemyUnit, 3000);
-    moveInterval = setInterval(moveUnits, 30);
+  function checkGameOver() {
+    if (playerTower.hp <= 0) {
+      messageDiv.textContent = 'You Lose!';
+      gameOver = true;
+      stopGameLoops();
+    }
+    if (enemyTower.hp <= 0) {
+      messageDiv.textContent = 'You Win!';
+      gameOver = true;
+      stopGameLoops();
+    }
   }
 
-  function resetClashGame() {
+  function regenElixir() {
+    if (gameOver) return;
+    if (playerElixir < maxElixir) {
+      playerElixir++;
+      updateStatus();
+    }
+  }
+
+  // Game loops
+  function startClashGame() {
+    resetClashGame();
+    elixirInterval = setInterval(regenElixir, 1500);
+    enemySpawnInterval = setInterval(spawnEnemyUnit, 4000);
+    moveInterval = setInterval(moveUnits, 30);
+  }
+  function stopGameLoops() {
     clearInterval(elixirInterval);
     clearInterval(enemySpawnInterval);
     clearInterval(moveInterval);
-    messageDiv.textContent = '';
+  }
+  function resetClashGame() {
+    stopGameLoops();
+    playerTower.hp = 10;
+    enemyTower.hp = 10;
+    playerElixir = maxElixir;
     playerUnits.forEach(u => u.remove());
     enemyUnits.forEach(u => u.remove());
     playerUnits = [];
     enemyUnits = [];
-    gameOver = false;
-    playerTower.hp = 10;
-    enemyTower.hp = 10;
-    playerElixir = 10;
+    messageDiv.textContent = '';
     updateStatus();
+    gameOver = false;
   }
 
-  function checkGameOver() {
-    if (gameOver) return;
-    if (playerTower.hp <= 0) {
-      gameOver = true;
-      messageDiv.textContent = 'Game Over! Enemy Wins!';
-      disableControls();
-      return;
-    }
-    if (enemyTower.hp <= 0) {
-      gameOver = true;
-      messageDiv.textContent = 'You Win! Congratulations!';
-      disableControls();
-      return;
-    }
-  }
-
-  function disableControls() {
-    document.querySelectorAll('#controls button[data-type]').forEach(btn => btn.disabled = true);
-  }
-
+  // Add listeners to troop buttons
   document.querySelectorAll('#controls button[data-type]').forEach(btn => {
     btn.addEventListener('click', () => {
       const level = parseInt(btn.getAttribute('data-type'));
@@ -391,7 +393,9 @@
       spawnPlayerUnit(level, cost);
     });
   });
+
 </script>
 
 </body>
 </html>
+
