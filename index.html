@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mini Poki</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f2f2f2;
+    }
+
+    header {
+      background-color: #00bcd4;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+      padding: 1rem;
+    }
+
+    .game-card {
+      background: white;
+      border-radius: 8px;
+      text-align: center;
+      text-decoration: none;
+      color: black;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s;
+    }
+
+    .game-card:hover {
+      transform: scale(1.05);
+    }
+
+    .game-card img {
+      max-width: 100%;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+    }
+
+    .game-screen {
+      display: none;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .game-screen.active {
+      display: block;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      background: #eee;
+      font-size: 0.9rem;
+    }
+
+    .back-btn {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background: #00bcd4;
+      color: white;
+      border-radius: 4px;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Mini Poki</h1>
+  </header>
+
+  <!-- Homepage Grid -->
+  <main id="home" class="game-grid">
+    <a href="#" class="game-card" onclick="openGame('game1')">
+      <img src="https://via.placeholder.com/150x100.png?text=Game+1" alt="Game 1" />
+      <h2>Game 1</h2>
+    </a>
+    <a href="#" class="game-card" onclick="openGame('game2')">
+      <img src="https://via.placeholder.com/150x100.png?text=Game+2" alt="Game 2" />
+      <h2>Game 2</h2>
+    </a>
+    <!-- Add more games if you want -->
+  </main>
+
+  <!-- Game Screens -->
+  <div id="game1" class="game-screen">
+    <h1>Game 1</h1>
+    <p>This is a placeholder for Game 1.</p>
+    <a href="#" class="back-btn" onclick="goHome()">← Back to Home</a>
+  </div>
+
+  <div id="game2" class="game-screen">
+    <h1>Game 2</h1>
+    <p>This is a placeholder for Game 2.</p>
+    <a href="#" class="back-btn" onclick="goHome()">← Back to Home</a>
+  </div>
+
+  <footer>
+    <p>Made by You — Poki-style clone</p>
+  </footer>
+
+  <script>
+    function openGame(gameId) {
+      document.getElementById('home').style.display = 'none';
+      document.querySelectorAll('.game-screen').forEach(el => {
+        el.classList.remove('active');
+      });
+      document.getElementById(gameId).classList.add('active');
+    }
+
+    function goHome() {
+      document.querySelectorAll('.game-screen').forEach(el => {
+        el.classList.remove('active');
+      });
+      document.getElementById('home').style.display = 'grid';
+    }
+  </script>
+</body>
+</html>
