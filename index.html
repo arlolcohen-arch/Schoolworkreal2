@@ -1,51 +1,253 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Mini Clash Royale Demo</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #e0f7fa;
-      margin: 0; padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      height: 100vh;
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mini Clash Royale by Arlo</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #e3f2fd;
+    margin: 0;
+    padding: 20px;
+    text-align: center;
+  }
+  #gameArea {
+    margin: 20px auto;
+    width: 400px;
+    height: 300px;
+    border: 3px solid #2196f3;
+    background: #bbdefb;
+    position: relative;
+  }
+  .tower {
+    width: 60px;
+    height: 120px;
+    background: #1565c0;
+    position: absolute;
+    bottom: 0;
+  }
+  #playerTower {
+    left: 10px;
+  }
+  #enemyTower {
+    right: 10px;
+  }
+  .unit {
+    width: 30px;
+    height: 30px;
+    background: #ff5722;
+    position: absolute;
+    bottom: 120px;
+    border-radius: 5px;
+  }
+  #enemyUnits .unit {
+    background: #4caf50;
+  }
+  #controls {
+    margin-top: 15px;
+  }
+  button {
+    background: #2196f3;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    margin: 0 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  button:disabled {
+    background: #90caf9;
+    cursor: not-allowed;
+  }
+  #status {
+    margin-top: 15px;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+
+<h1>Mini Clash Royale by Arlo</h1>
+<div id="gameArea">
+  <div id="playerTower" class="tower"></div>
+  <div id="enemyTower" class="tower"></div>
+  <div id="playerUnits"></div>
+  <div id="enemyUnits"></div>
+</div>
+
+<div id="controls">
+  <button id="spawnPlayerUnit">Spawn Player Unit (Cost: 3)</button>
+  <button id="spawnEnemyUnit" disabled>Spawn Enemy Unit (AI)</button>
+</div>
+
+<div id="status">Player Tower HP: 10 | Enemy Tower HP: 10</div>
+
+<script>
+  const playerTower = {
+    hp: 10,
+    element: document.getElementById('playerTower')
+  };
+  const enemyTower = {
+    hp: 10,
+    element: document.getElementById('enemyTower')
+  };
+
+  const playerUnitsDiv = document.getElementById('playerUnits');
+  const enemyUnitsDiv = document.getElementById('enemyUnits');
+
+  let playerUnits = [];
+  let enemyUnits = [];
+
+  // Player energy - simplified for cooldown
+  let playerEnergy = 10;
+  const energyCost = 3;
+  const maxEnergy = 10;
+  const energyRechargeRate = 1; // energy per 1 sec
+
+  // Update status
+  const statusDiv = document.getElementById('status');
+  function updateStatus() {
+    statusDiv.textContent = `Player Tower HP: ${playerTower.hp} | Enemy Tower HP: ${enemyTower.hp} | Energy: ${playerEnergy}`;
+  }
+
+  // Create a unit
+  function createUnit(type, side) {
+    const unit = document.createElement('div');
+    unit.classList.add('unit');
+    if(side === 'enemy') unit.style.background = '#4caf50';
+    unit.style.bottom = '120px';
+
+    // Starting position:
+    if(side === 'player') {
+      unit.style.left = '70px';
+    } else {
+      unit.style.right = '70px';
     }
-    header {
-      background: #00796b;
-      color: white;
-      width: 100%;
-      padding: 1rem;
-      text-align: center;
+    unit.side = side;
+    unit.hp = 3;
+    return unit;
+  }
+
+  // Move units
+  function moveUnits() {
+    playerUnits.forEach((unit, i) => {
+      const currentLeft = parseInt(unit.style.left);
+      if(currentLeft >= 350) {
+        // Attack enemy tower
+        enemyTower.hp--;
+        removeUnit(unit, 'player', i);
+        checkGameOver();
+        updateStatus();
+        return;
+      }
+      unit.style.left = currentLeft + 1 + 'px';
+    });
+
+    enemyUnits.forEach((unit, i) => {
+      const currentRight = parseInt(unit.style.right);
+      if(currentRight >= 350) {
+        // Attack player tower
+        playerTower.hp--;
+        removeUnit(unit, 'enemy', i);
+        checkGameOver();
+        updateStatus();
+        return;
+      }
+      unit.style.right = currentRight + 1 + 'px';
+    });
+
+    // Check collisions
+    for(let i = 0; i < playerUnits.length; i++) {
+      const pUnit = playerUnits[i];
+      const pPos = parseInt(pUnit.style.left);
+      for(let j = 0; j < enemyUnits.length; j++) {
+        const eUnit = enemyUnits[j];
+        const ePos = 400 - parseInt(eUnit.style.right);
+
+        if(Math.abs(pPos - ePos) < 30) {
+          // Units attack each other
+          pUnit.hp--;
+          eUnit.hp--;
+          if(pUnit.hp <= 0) removeUnit(pUnit, 'player', i);
+          if(eUnit.hp <= 0) removeUnit(eUnit, 'enemy', j);
+          updateStatus();
+          break;
+        }
+      }
     }
-    #battlefield {
-      margin-top: 20px;
-      width: 600px;
-      height: 300px;
-      background: #004d40;
-      border-radius: 10px;
-      position: relative;
-      overflow: hidden;
+  }
+
+  // Remove unit from screen and array
+  function removeUnit(unit, side, index) {
+    if(side === 'player') {
+      if(playerUnits[index] === unit) {
+        playerUnits.splice(index,1);
+        unit.remove();
+      }
+    } else {
+      if(enemyUnits[index] === unit) {
+        enemyUnits.splice(index,1);
+        unit.remove();
+      }
     }
-    .unit {
-      width: 80px;
-      height: 80px;
-      position: absolute;
-      bottom: 50px;
-      border-radius: 10px;
-      text-align: center;
-      color: white;
-      font-weight: bold;
-      line-height: 80px;
-      user-select: none;
+  }
+
+  // Spawn player unit
+  document.getElementById('spawnPlayerUnit').addEventListener('click', () => {
+    if(playerEnergy >= energyCost) {
+      const unit = createUnit('soldier', 'player');
+      playerUnits.push(unit);
+      playerUnitsDiv.appendChild(unit);
+      playerEnergy -= energyCost;
+      updateStatus();
+    } else {
+      alert('Not enough energy!');
     }
-    #unit1 {
-      background: #ff7043;
-      left: 50px;
-      animation: moveRight 2s infinite alternate;
+  });
+
+  // Spawn enemy unit (AI)
+  function spawnEnemyUnit() {
+    const unit = createUnit('soldier', 'enemy');
+    enemyUnits.push(unit);
+    enemyUnitsDiv.appendChild(unit);
+  }
+
+  // Energy recharge loop
+  setInterval(() => {
+    if(playerEnergy < maxEnergy) {
+      playerEnergy++;
+      updateStatus();
     }
-    #unit2 {
-      background: #42a5
+  }, 1000);
+
+  // Enemy spawn loop
+  setInterval(() => {
+    spawnEnemyUnit();
+  }, 3000);
+
+  // Movement loop
+  setInterval(() => {
+    moveUnits();
+  }, 30);
+
+  // Check game over
+  function checkGameOver() {
+    if(playerTower.hp <= 0) {
+      alert('Game Over! Enemy Wins!');
+      location.reload();
+    }
+    if(enemyTower.hp <= 0) {
+      alert('You Win! Congratulations!');
+      location.reload();
+    }
+  }
+
+  updateStatus();
+</script>
+
+</body>
+</html>
+
+     
