@@ -40,6 +40,12 @@
     position: absolute;
     bottom: 120px;
     border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
   }
   #enemyUnits .unit {
     background: #4caf50;
@@ -52,7 +58,7 @@
     color: white;
     border: none;
     padding: 10px 15px;
-    margin: 0 10px;
+    margin: 0 10px 10px 10px;
     font-size: 16px;
     border-radius: 5px;
     cursor: pointer;
@@ -61,15 +67,26 @@
     background: #90caf9;
     cursor: not-allowed;
   }
+  #backBtn {
+    background: #f44336;
+  }
   #status {
     margin-top: 15px;
     font-weight: bold;
+  }
+  #message {
+    font-size: 24px;
+    font-weight: 700;
+    color: #d32f2f;
+    margin: 10px 0;
+    height: 30px;
   }
 </style>
 </head>
 <body>
 
 <h1>Mini Clash Royale by Arlo</h1>
+<div id="message"></div>
 <div id="gameArea">
   <div id="playerTower" class="tower"></div>
   <div id="enemyTower" class="tower"></div>
@@ -78,64 +95,68 @@
 </div>
 
 <div id="controls">
-  <button id="spawnPlayerUnit">Spawn Player Unit (Cost: 3)</button>
-  <button id="spawnEnemyUnit" disabled>Spawn Enemy Unit (AI)</button>
+  <button data-type="1" data-cost="3" data-hp="3">Spawn Troop Lv1 (3 Elixir)</button>
+  <button data-type="2" data-cost="5" data-hp="5">Spawn Troop Lv2 (5 Elixir)</button>
+  <button data-type="3" data-cost="7" data-hp="8">Spawn Troop Lv3 (7 Elixir)</button>
+  <br />
+  <button id="backBtn">← Back to Home</button>
 </div>
 
-<div id="status">Player Tower HP: 10 | Enemy Tower HP: 10</div>
+<div id="status">Player Tower HP: 10 | Enemy Tower HP: 10 | Elixir: 10</div>
 
 <script>
-  const playerTower = {
-    hp: 10,
-    element: document.getElementById('playerTower')
-  };
-  const enemyTower = {
-    hp: 10,
-    element: document.getElementById('enemyTower')
-  };
+  // Tower objects
+  const playerTower = { hp: 10, element: document.getElementById('playerTower') };
+  const enemyTower = { hp: 10, element: document.getElementById('enemyTower') };
 
+  // Unit containers
   const playerUnitsDiv = document.getElementById('playerUnits');
   const enemyUnitsDiv = document.getElementById('enemyUnits');
 
   let playerUnits = [];
   let enemyUnits = [];
 
-  // Player energy - simplified for cooldown
-  let playerEnergy = 10;
-  const energyCost = 3;
-  const maxEnergy = 10;
-  const energyRechargeRate = 1; // energy per 1 sec
+  // Elixir and cost settings
+  let playerElixir = 10;
+  const maxElixir = 10;
+  const elixirRechargeRate = 1; // per second
 
-  // Update status
   const statusDiv = document.getElementById('status');
+  const messageDiv = document.getElementById('message');
+
+  let gameOver = false;
+
+  // Update status text
   function updateStatus() {
-    statusDiv.textContent = `Player Tower HP: ${playerTower.hp} | Enemy Tower HP: ${enemyTower.hp} | Energy: ${playerEnergy}`;
+    statusDiv.textContent = `Player Tower HP: ${playerTower.hp} | Enemy Tower HP: ${enemyTower.hp} | Elixir: ${playerElixir}`;
   }
 
-  // Create a unit
-  function createUnit(type, side) {
+  // Create unit element
+  function createUnit(level, side) {
     const unit = document.createElement('div');
     unit.classList.add('unit');
     if(side === 'enemy') unit.style.background = '#4caf50';
-    unit.style.bottom = '120px';
 
-    // Starting position:
-    if(side === 'player') {
-      unit.style.left = '70px';
-    } else {
-      unit.style.right = '70px';
-    }
+    // Position
+    unit.style.bottom = '120px';
+    if(side === 'player') unit.style.left = '70px';
+    else unit.style.right = '70px';
+
+    // Level styling and label
+    unit.textContent = `Lv${level}`;
     unit.side = side;
-    unit.hp = 3;
+    unit.hp = [0,3,5,8][level] || 3; // hp by level
+    unit.level = level;
     return unit;
   }
 
-  // Move units
+  // Move all units
   function moveUnits() {
+    if(gameOver) return;
+
     playerUnits.forEach((unit, i) => {
       const currentLeft = parseInt(unit.style.left);
       if(currentLeft >= 350) {
-        // Attack enemy tower
         enemyTower.hp--;
         removeUnit(unit, 'player', i);
         checkGameOver();
@@ -148,7 +169,6 @@
     enemyUnits.forEach((unit, i) => {
       const currentRight = parseInt(unit.style.right);
       if(currentRight >= 350) {
-        // Attack player tower
         playerTower.hp--;
         removeUnit(unit, 'enemy', i);
         checkGameOver();
@@ -158,7 +178,7 @@
       unit.style.right = currentRight + 1 + 'px';
     });
 
-    // Check collisions
+    // Check collisions and fight
     for(let i = 0; i < playerUnits.length; i++) {
       const pUnit = playerUnits[i];
       const pPos = parseInt(pUnit.style.left);
@@ -167,7 +187,6 @@
         const ePos = 400 - parseInt(eUnit.style.right);
 
         if(Math.abs(pPos - ePos) < 30) {
-          // Units attack each other
           pUnit.hp--;
           eUnit.hp--;
           if(pUnit.hp <= 0) removeUnit(pUnit, 'player', i);
@@ -179,7 +198,7 @@
     }
   }
 
-  // Remove unit from screen and array
+  // Remove unit helper
   function removeUnit(unit, side, index) {
     if(side === 'player') {
       if(playerUnits[index] === unit) {
@@ -194,30 +213,34 @@
     }
   }
 
-  // Spawn player unit
-  document.getElementById('spawnPlayerUnit').addEventListener('click', () => {
-    if(playerEnergy >= energyCost) {
-      const unit = createUnit('soldier', 'player');
+  // Spawn player troop with level, cost, hp from buttons
+  function spawnPlayerUnit(level, cost) {
+    if(gameOver) return;
+    if(playerElixir >= cost) {
+      const unit = createUnit(level, 'player');
       playerUnits.push(unit);
       playerUnitsDiv.appendChild(unit);
-      playerEnergy -= energyCost;
+      playerElixir -= cost;
       updateStatus();
     } else {
-      alert('Not enough energy!');
+      alert('Not enough Elixir!');
     }
-  });
+  }
 
-  // Spawn enemy unit (AI)
+  // Enemy AI spawning troops randomly between levels 1-3
   function spawnEnemyUnit() {
-    const unit = createUnit('soldier', 'enemy');
+    if(gameOver) return;
+    const level = Math.floor(Math.random() * 3) + 1;
+    const unit = createUnit(level, 'enemy');
     enemyUnits.push(unit);
     enemyUnitsDiv.appendChild(unit);
   }
 
-  // Energy recharge loop
+  // Recharge elixir every second
   setInterval(() => {
-    if(playerEnergy < maxEnergy) {
-      playerEnergy++;
+    if(gameOver) return;
+    if(playerElixir < maxElixir) {
+      playerElixir++;
       updateStatus();
     }
   }, 1000);
@@ -227,27 +250,50 @@
     spawnEnemyUnit();
   }, 3000);
 
-  // Movement loop
+  // Units move loop
   setInterval(() => {
     moveUnits();
   }, 30);
 
-  // Check game over
+  // Check game end conditions
   function checkGameOver() {
+    if(gameOver) return;
     if(playerTower.hp <= 0) {
-      alert('Game Over! Enemy Wins!');
-      location.reload();
+      gameOver = true;
+      messageDiv.textContent = 'Game Over! Enemy Wins!';
+      disableControls();
+      return;
     }
     if(enemyTower.hp <= 0) {
-      alert('You Win! Congratulations!');
-      location.reload();
+      gameOver = true;
+      messageDiv.textContent = 'You Win! Congratulations!';
+      disableControls();
+      return;
     }
   }
 
+  // Disable spawn buttons after game ends
+  function disableControls() {
+    document.querySelectorAll('#controls button[data-type]').forEach(btn => btn.disabled = true);
+  }
+
   updateStatus();
+
+  // Button event listeners for spawn troops
+  const buttons = document.querySelectorAll('#controls button[data-type]');
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const level = parseInt(btn.getAttribute('data-type'));
+      const cost = parseInt(btn.getAttribute('data-cost'));
+      spawnPlayerUnit(level, cost);
+    });
+  });
+
+  // Back button - reloads page (you can customize to go back to home in your site)
+  document.getElementById('backBtn').addEventListener('click', () => {
+    location.reload();
+  });
 </script>
 
 </body>
 </html>
-
-     
