@@ -1,154 +1,178 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Poki-like Website with Clash Royale</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #e3f2fd;
-    margin: 0;
-    padding: 20px;
-    text-align: center;
-  }
-  .page {
-    display: none;
-  }
-  .active {
-    display: block;
-  }
-  #gameList button {
-    margin: 10px;
-    padding: 10px 15px;
-    font-size: 18px;
-    cursor: pointer;
-  }
-  #gameArea {
-    margin: 20px auto;
-    width: 400px;
-    height: 300px;
-    border: 3px solid #2196f3;
-    background: #bbdefb;
-    position: relative;
-  }
-  .tower {
-    width: 60px;
-    height: 120px;
-    background: #1565c0;
-    position: absolute;
-    bottom: 0;
-  }
-  #playerTower {
-    left: 10px;
-  }
-  #enemyTower {
-    right: 10px;
-  }
-  .unit {
-    width: 30px;
-    height: 30px;
-    background: #ff5722;
-    position: absolute;
-    bottom: 120px;
-    border-radius: 5px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    font-weight: bold;
-    font-size: 14px;
-  }
-  #enemyUnits .unit {
-    background: #4caf50;
-  }
-  #controls {
-    margin-top: 15px;
-  }
-  button {
-    background: #2196f3;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    margin: 0 10px 10px 10px;
-    font-size: 16px;
-    border-radius: 5px;
-  }
-  button:disabled {
-    background: #90caf9;
-    cursor: not-allowed;
-  }
-  #backBtn {
-    background: #f44336;
-  }
-  #status {
-    margin-top: 15px;
-    font-weight: bold;
-  }
-  #message {
-    font-size: 24px;
-    font-weight: 700;
-    color: #d32f2f;
-    margin: 10px 0;
-    height: 30px;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Arlo's Game Hub</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #e3f2fd;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    .page {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+    #gameList button {
+      margin: 10px;
+      padding: 10px 15px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    #gameArea {
+      margin: 20px auto;
+      width: 400px;
+      height: 300px;
+      border: 3px solid #2196f3;
+      background: #bbdefb;
+      position: relative;
+    }
+    .tower {
+      width: 60px;
+      height: 120px;
+      background: #1565c0;
+      position: absolute;
+      bottom: 0;
+    }
+    #playerTower {
+      left: 10px;
+    }
+    #enemyTower {
+      right: 10px;
+    }
+    .unit {
+      width: 30px;
+      height: 30px;
+      background: #ff5722;
+      position: absolute;
+      bottom: 120px;
+      border-radius: 5px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    #enemyUnits .unit {
+      background: #4caf50;
+    }
+    #controls {
+      margin-top: 15px;
+    }
+    button {
+      background: #2196f3;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      margin: 0 10px 10px 10px;
+      font-size: 16px;
+      border-radius: 5px;
+    }
+    button:disabled {
+      background: #90caf9;
+      cursor: not-allowed;
+    }
+    #backBtn {
+      background: #f44336;
+    }
+    #status {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    #message {
+      font-size: 24px;
+      font-weight: 700;
+      color: #d32f2f;
+      margin: 10px 0;
+      height: 30px;
+    }
+    iframe {
+      width: 100%;
+      height: 600px;
+      border: none;
+      border-radius: 8px;
+    }
+  </style>
 </head>
 <body>
 
-<!-- HOMEPAGE -->
-<div id="homePage" class="page active">
-  <h1>Welcome to Arlo's Game Hub</h1>
-  <div id="gameList">
-    <button id="playClashBtn">Play Clash Royale Mini-Game</button>
-    <!-- You can add more game buttons here -->
-  </div>
-</div>
-
-<!-- CLASH ROYALE PAGE -->
-<div id="clashPage" class="page">
-  <h1>Mini Clash Royale by Arlo</h1>
-  <div id="message"></div>
-  <div id="gameArea">
-    <div id="playerTower" class="tower"></div>
-    <div id="enemyTower" class="tower"></div>
-    <div id="playerUnits"></div>
-    <div id="enemyUnits"></div>
+  <!-- HOME PAGE -->
+  <div id="homePage" class="page active">
+    <h1>Welcome to Arlo's Game Hub</h1>
+    <div id="gameList">
+      <button id="btnClash">Play Clash Royale Mini-Game</button>
+      <button id="btnFlappy">Play Flappy Bird</button>
+      <!-- You can add more game options here -->
+    </div>
   </div>
 
-  <div id="controls">
-    <button data-type="1" data-cost="3" data-hp="3">Spawn Troop Lv1 (3 Elixir)</button>
-    <button data-type="2" data-cost="5" data-hp="5">Spawn Troop Lv2 (5 Elixir)</button>
-    <button data-type="3" data-cost="7" data-hp="8">Spawn Troop Lv3 (7 Elixir)</button>
-    <br />
-    <button id="backBtn">← Back to Home</button>
+  <!-- CLASH ROYALE PAGE -->
+  <div id="clashPage" class="page">
+    <h1>Mini Clash Royale by Arlo</h1>
+    <div id="message"></div>
+    <div id="gameArea">
+      <div id="playerTower" class="tower"></div>
+      <div id="enemyTower" class="tower"></div>
+      <div id="playerUnits"></div>
+      <div id="enemyUnits"></div>
+    </div>
+
+    <div id="controls">
+      <button data-type="1" data-cost="3" data-hp="3">Spawn Troop Lv1 (3 Elixir)</button>
+      <button data-type="2" data-cost="5" data-hp="5">Spawn Troop Lv2 (5 Elixir)</button>
+      <button data-type="3" data-cost="7" data-hp="8">Spawn Troop Lv3 (7 Elixir)</button>
+      <br />
+      <button id="backClash">← Back to Home</button>
+    </div>
+
+    <div id="status">Player Tower HP: 10 | Enemy Tower HP: 10 | Elixir: 10</div>
   </div>
 
-  <div id="status">Player Tower HP: 10 | Enemy Tower HP: 10 | Elixir: 10</div>
-</div>
+  <!-- FLAPPY BIRD PAGE -->
+  <div id="flappyPage" class="page">
+    <h1>Flappy Bird</h1>
+    <iframe src="https://flappybird.io/"></iframe>
+    <button id="backFlappy">← Back to Home</button>
+  </div>
 
 <script>
-  // Pages
+  // Page elements
   const homePage = document.getElementById('homePage');
   const clashPage = document.getElementById('clashPage');
+  const flappyPage = document.getElementById('flappyPage');
 
-  // Buttons
-  const playClashBtn = document.getElementById('playClashBtn');
-  const backBtn = document.getElementById('backBtn');
-
-  playClashBtn.addEventListener('click', () => {
-    homePage.classList.remove('active');
-    clashPage.classList.add('active');
+  // Buttons to navigate
+  document.getElementById('btnClash').addEventListener('click', () => {
+    showPage('clash');
     startClashGame();
   });
-
-  backBtn.addEventListener('click', () => {
-    clashPage.classList.remove('active');
-    homePage.classList.add('active');
+  document.getElementById('btnFlappy').addEventListener('click', () => {
+    showPage('flappy');
+  });
+  document.getElementById('backClash').addEventListener('click', () => {
+    showPage('home');
     resetClashGame();
   });
+  document.getElementById('backFlappy').addEventListener('click', () => {
+    showPage('home');
+  });
 
-  // Clash Royale Game Code (simplified and self-contained)
+  function showPage(pageName) {
+    homePage.classList.remove('active');
+    clashPage.classList.remove('active');
+    flappyPage.classList.remove('active');
+    if (pageName === 'home') homePage.classList.add('active');
+    else if (pageName === 'clash') clashPage.classList.add('active');
+    else if (pageName === 'flappy') flappyPage.classList.add('active');
+  }
+
+  // --- Clash Royale Game Code (same as before) ---
 
   const playerTower = { hp: 10, element: document.getElementById('playerTower') };
   const enemyTower = { hp: 10, element: document.getElementById('enemyTower') };
@@ -160,12 +184,12 @@
 
   let playerElixir = 10;
   const maxElixir = 10;
-  const elixirRechargeRate = 1;
 
   const statusDiv = document.getElementById('status');
   const messageDiv = document.getElementById('message');
 
   let gameOver = false;
+  let elixirInterval, enemySpawnInterval, moveInterval;
 
   function updateStatus() {
     statusDiv.textContent = `Player Tower HP: ${playerTower.hp} | Enemy Tower HP: ${enemyTower.hp} | Elixir: ${playerElixir}`;
@@ -174,10 +198,10 @@
   function createUnit(level, side) {
     const unit = document.createElement('div');
     unit.classList.add('unit');
-    if(side === 'enemy') unit.style.background = '#4caf50';
+    if (side === 'enemy') unit.style.background = '#4caf50';
 
     unit.style.bottom = '120px';
-    if(side === 'player') unit.style.left = '70px';
+    if (side === 'player') unit.style.left = '70px';
     else unit.style.right = '70px';
 
     unit.textContent = `Lv${level}`;
@@ -188,11 +212,11 @@
   }
 
   function moveUnits() {
-    if(gameOver) return;
+    if (gameOver) return;
 
     playerUnits.forEach((unit, i) => {
       const currentLeft = parseInt(unit.style.left);
-      if(currentLeft >= 350) {
+      if (currentLeft >= 350) {
         enemyTower.hp--;
         removeUnit(unit, 'player', i);
         checkGameOver();
@@ -204,7 +228,7 @@
 
     enemyUnits.forEach((unit, i) => {
       const currentRight = parseInt(unit.style.right);
-      if(currentRight >= 350) {
+      if (currentRight >= 350) {
         playerTower.hp--;
         removeUnit(unit, 'enemy', i);
         checkGameOver();
@@ -214,18 +238,17 @@
       unit.style.right = currentRight + 1 + 'px';
     });
 
-    for(let i = 0; i < playerUnits.length; i++) {
+    for (let i = 0; i < playerUnits.length; i++) {
       const pUnit = playerUnits[i];
       const pPos = parseInt(pUnit.style.left);
-      for(let j = 0; j < enemyUnits.length; j++) {
+      for (let j = 0; j < enemyUnits.length; j++) {
         const eUnit = enemyUnits[j];
         const ePos = 400 - parseInt(eUnit.style.right);
-
-        if(Math.abs(pPos - ePos) < 30) {
+        if (Math.abs(pPos - ePos) < 30) {
           pUnit.hp--;
           eUnit.hp--;
-          if(pUnit.hp <= 0) removeUnit(pUnit, 'player', i);
-          if(eUnit.hp <= 0) removeUnit(eUnit, 'enemy', j);
+          if (pUnit.hp <= 0) removeUnit(pUnit, 'player', i);
+          if (eUnit.hp <= 0) removeUnit(eUnit, 'enemy', j);
           updateStatus();
           break;
         }
@@ -234,22 +257,22 @@
   }
 
   function removeUnit(unit, side, index) {
-    if(side === 'player') {
-      if(playerUnits[index] === unit) {
-        playerUnits.splice(index,1);
+    if (side === 'player') {
+      if (playerUnits[index] === unit) {
+        playerUnits.splice(index, 1);
         unit.remove();
       }
     } else {
-      if(enemyUnits[index] === unit) {
-        enemyUnits.splice(index,1);
+      if (enemyUnits[index] === unit) {
+        enemyUnits.splice(index, 1);
         unit.remove();
       }
     }
   }
 
   function spawnPlayerUnit(level, cost) {
-    if(gameOver) return;
-    if(playerElixir >= cost) {
+    if (gameOver) return;
+    if (playerElixir >= cost) {
       const unit = createUnit(level, 'player');
       playerUnits.push(unit);
       playerUnitsDiv.appendChild(unit);
@@ -261,17 +284,15 @@
   }
 
   function spawnEnemyUnit() {
-    if(gameOver) return;
+    if (gameOver) return;
     const level = Math.floor(Math.random() * 3) + 1;
     const unit = createUnit(level, 'enemy');
     enemyUnits.push(unit);
     enemyUnitsDiv.appendChild(unit);
   }
 
-  let elixirInterval, enemySpawnInterval, moveInterval;
-
   function startClashGame() {
-    // Reset variables
+    // Reset game variables
     playerTower.hp = 10;
     enemyTower.hp = 10;
     playerElixir = 10;
@@ -279,19 +300,17 @@
     messageDiv.textContent = '';
     updateStatus();
 
-    // Clear any existing units
+    // Remove old units if any
     playerUnits.forEach(u => u.remove());
     enemyUnits.forEach(u => u.remove());
     playerUnits = [];
     enemyUnits = [];
 
-    // Enable buttons
     document.querySelectorAll('#controls button[data-type]').forEach(btn => btn.disabled = false);
 
-    // Start intervals
     elixirInterval = setInterval(() => {
-      if(gameOver) return;
-      if(playerElixir < maxElixir) {
+      if (gameOver) return;
+      if (playerElixir < maxElixir) {
         playerElixir++;
         updateStatus();
       }
@@ -307,18 +326,15 @@
   }
 
   function resetClashGame() {
-    // Stop intervals
     clearInterval(elixirInterval);
     clearInterval(enemySpawnInterval);
     clearInterval(moveInterval);
-    // Clear message and units
     messageDiv.textContent = '';
     playerUnits.forEach(u => u.remove());
     enemyUnits.forEach(u => u.remove());
     playerUnits = [];
     enemyUnits = [];
     gameOver = false;
-    // Reset towers and elixir
     playerTower.hp = 10;
     enemyTower.hp = 10;
     playerElixir = 10;
@@ -326,14 +342,14 @@
   }
 
   function checkGameOver() {
-    if(gameOver) return;
-    if(playerTower.hp <= 0) {
+    if (gameOver) return;
+    if (playerTower.hp <= 0) {
       gameOver = true;
       messageDiv.textContent = 'Game Over! Enemy Wins!';
       disableControls();
       return;
     }
-    if(enemyTower.hp <= 0) {
+    if (enemyTower.hp <= 0) {
       gameOver = true;
       messageDiv.textContent = 'You Win! Congratulations!';
       disableControls();
