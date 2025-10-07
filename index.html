@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Mini Clash Royale by Arlo</title>
+<title>Poki-like Website with Clash Royale</title>
 <style>
   body {
     font-family: Arial, sans-serif;
@@ -11,6 +11,18 @@
     margin: 0;
     padding: 20px;
     text-align: center;
+  }
+  .page {
+    display: none;
+  }
+  .active {
+    display: block;
+  }
+  #gameList button {
+    margin: 10px;
+    padding: 10px 15px;
+    font-size: 18px;
+    cursor: pointer;
   }
   #gameArea {
     margin: 20px auto;
@@ -61,7 +73,6 @@
     margin: 0 10px 10px 10px;
     font-size: 16px;
     border-radius: 5px;
-    cursor: pointer;
   }
   button:disabled {
     background: #90caf9;
@@ -85,72 +96,97 @@
 </head>
 <body>
 
-<h1>Mini Clash Royale by Arlo</h1>
-<div id="message"></div>
-<div id="gameArea">
-  <div id="playerTower" class="tower"></div>
-  <div id="enemyTower" class="tower"></div>
-  <div id="playerUnits"></div>
-  <div id="enemyUnits"></div>
+<!-- HOMEPAGE -->
+<div id="homePage" class="page active">
+  <h1>Welcome to Arlo's Game Hub</h1>
+  <div id="gameList">
+    <button id="playClashBtn">Play Clash Royale Mini-Game</button>
+    <!-- You can add more game buttons here -->
+  </div>
 </div>
 
-<div id="controls">
-  <button data-type="1" data-cost="3" data-hp="3">Spawn Troop Lv1 (3 Elixir)</button>
-  <button data-type="2" data-cost="5" data-hp="5">Spawn Troop Lv2 (5 Elixir)</button>
-  <button data-type="3" data-cost="7" data-hp="8">Spawn Troop Lv3 (7 Elixir)</button>
-  <br />
-  <button id="backBtn">← Back to Home</button>
-</div>
+<!-- CLASH ROYALE PAGE -->
+<div id="clashPage" class="page">
+  <h1>Mini Clash Royale by Arlo</h1>
+  <div id="message"></div>
+  <div id="gameArea">
+    <div id="playerTower" class="tower"></div>
+    <div id="enemyTower" class="tower"></div>
+    <div id="playerUnits"></div>
+    <div id="enemyUnits"></div>
+  </div>
 
-<div id="status">Player Tower HP: 10 | Enemy Tower HP: 10 | Elixir: 10</div>
+  <div id="controls">
+    <button data-type="1" data-cost="3" data-hp="3">Spawn Troop Lv1 (3 Elixir)</button>
+    <button data-type="2" data-cost="5" data-hp="5">Spawn Troop Lv2 (5 Elixir)</button>
+    <button data-type="3" data-cost="7" data-hp="8">Spawn Troop Lv3 (7 Elixir)</button>
+    <br />
+    <button id="backBtn">← Back to Home</button>
+  </div>
+
+  <div id="status">Player Tower HP: 10 | Enemy Tower HP: 10 | Elixir: 10</div>
+</div>
 
 <script>
-  // Tower objects
+  // Pages
+  const homePage = document.getElementById('homePage');
+  const clashPage = document.getElementById('clashPage');
+
+  // Buttons
+  const playClashBtn = document.getElementById('playClashBtn');
+  const backBtn = document.getElementById('backBtn');
+
+  playClashBtn.addEventListener('click', () => {
+    homePage.classList.remove('active');
+    clashPage.classList.add('active');
+    startClashGame();
+  });
+
+  backBtn.addEventListener('click', () => {
+    clashPage.classList.remove('active');
+    homePage.classList.add('active');
+    resetClashGame();
+  });
+
+  // Clash Royale Game Code (simplified and self-contained)
+
   const playerTower = { hp: 10, element: document.getElementById('playerTower') };
   const enemyTower = { hp: 10, element: document.getElementById('enemyTower') };
-
-  // Unit containers
   const playerUnitsDiv = document.getElementById('playerUnits');
   const enemyUnitsDiv = document.getElementById('enemyUnits');
 
   let playerUnits = [];
   let enemyUnits = [];
 
-  // Elixir and cost settings
   let playerElixir = 10;
   const maxElixir = 10;
-  const elixirRechargeRate = 1; // per second
+  const elixirRechargeRate = 1;
 
   const statusDiv = document.getElementById('status');
   const messageDiv = document.getElementById('message');
 
   let gameOver = false;
 
-  // Update status text
   function updateStatus() {
     statusDiv.textContent = `Player Tower HP: ${playerTower.hp} | Enemy Tower HP: ${enemyTower.hp} | Elixir: ${playerElixir}`;
   }
 
-  // Create unit element
   function createUnit(level, side) {
     const unit = document.createElement('div');
     unit.classList.add('unit');
     if(side === 'enemy') unit.style.background = '#4caf50';
 
-    // Position
     unit.style.bottom = '120px';
     if(side === 'player') unit.style.left = '70px';
     else unit.style.right = '70px';
 
-    // Level styling and label
     unit.textContent = `Lv${level}`;
     unit.side = side;
-    unit.hp = [0,3,5,8][level] || 3; // hp by level
+    unit.hp = [0,3,5,8][level] || 3;
     unit.level = level;
     return unit;
   }
 
-  // Move all units
   function moveUnits() {
     if(gameOver) return;
 
@@ -178,7 +214,6 @@
       unit.style.right = currentRight + 1 + 'px';
     });
 
-    // Check collisions and fight
     for(let i = 0; i < playerUnits.length; i++) {
       const pUnit = playerUnits[i];
       const pPos = parseInt(pUnit.style.left);
@@ -198,7 +233,6 @@
     }
   }
 
-  // Remove unit helper
   function removeUnit(unit, side, index) {
     if(side === 'player') {
       if(playerUnits[index] === unit) {
@@ -213,7 +247,6 @@
     }
   }
 
-  // Spawn player troop with level, cost, hp from buttons
   function spawnPlayerUnit(level, cost) {
     if(gameOver) return;
     if(playerElixir >= cost) {
@@ -227,7 +260,6 @@
     }
   }
 
-  // Enemy AI spawning troops randomly between levels 1-3
   function spawnEnemyUnit() {
     if(gameOver) return;
     const level = Math.floor(Math.random() * 3) + 1;
@@ -236,26 +268,63 @@
     enemyUnitsDiv.appendChild(unit);
   }
 
-  // Recharge elixir every second
-  setInterval(() => {
-    if(gameOver) return;
-    if(playerElixir < maxElixir) {
-      playerElixir++;
-      updateStatus();
-    }
-  }, 1000);
+  let elixirInterval, enemySpawnInterval, moveInterval;
 
-  // Enemy spawn loop
-  setInterval(() => {
-    spawnEnemyUnit();
-  }, 3000);
+  function startClashGame() {
+    // Reset variables
+    playerTower.hp = 10;
+    enemyTower.hp = 10;
+    playerElixir = 10;
+    gameOver = false;
+    messageDiv.textContent = '';
+    updateStatus();
 
-  // Units move loop
-  setInterval(() => {
-    moveUnits();
-  }, 30);
+    // Clear any existing units
+    playerUnits.forEach(u => u.remove());
+    enemyUnits.forEach(u => u.remove());
+    playerUnits = [];
+    enemyUnits = [];
 
-  // Check game end conditions
+    // Enable buttons
+    document.querySelectorAll('#controls button[data-type]').forEach(btn => btn.disabled = false);
+
+    // Start intervals
+    elixirInterval = setInterval(() => {
+      if(gameOver) return;
+      if(playerElixir < maxElixir) {
+        playerElixir++;
+        updateStatus();
+      }
+    }, 1000);
+
+    enemySpawnInterval = setInterval(() => {
+      spawnEnemyUnit();
+    }, 3000);
+
+    moveInterval = setInterval(() => {
+      moveUnits();
+    }, 30);
+  }
+
+  function resetClashGame() {
+    // Stop intervals
+    clearInterval(elixirInterval);
+    clearInterval(enemySpawnInterval);
+    clearInterval(moveInterval);
+    // Clear message and units
+    messageDiv.textContent = '';
+    playerUnits.forEach(u => u.remove());
+    enemyUnits.forEach(u => u.remove());
+    playerUnits = [];
+    enemyUnits = [];
+    gameOver = false;
+    // Reset towers and elixir
+    playerTower.hp = 10;
+    enemyTower.hp = 10;
+    playerElixir = 10;
+    updateStatus();
+  }
+
   function checkGameOver() {
     if(gameOver) return;
     if(playerTower.hp <= 0) {
@@ -272,26 +341,16 @@
     }
   }
 
-  // Disable spawn buttons after game ends
   function disableControls() {
     document.querySelectorAll('#controls button[data-type]').forEach(btn => btn.disabled = true);
   }
 
-  updateStatus();
-
-  // Button event listeners for spawn troops
-  const buttons = document.querySelectorAll('#controls button[data-type]');
-  buttons.forEach(btn => {
+  document.querySelectorAll('#controls button[data-type]').forEach(btn => {
     btn.addEventListener('click', () => {
       const level = parseInt(btn.getAttribute('data-type'));
       const cost = parseInt(btn.getAttribute('data-cost'));
       spawnPlayerUnit(level, cost);
     });
-  });
-
-  // Back button - reloads page (you can customize to go back to home in your site)
-  document.getElementById('backBtn').addEventListener('click', () => {
-    location.reload();
   });
 </script>
 
