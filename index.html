@@ -73,6 +73,7 @@
       margin: 0 10px 10px 10px;
       font-size: 16px;
       border-radius: 5px;
+      cursor: pointer;
     }
     button:disabled {
       background: #90caf9;
@@ -98,6 +99,45 @@
       border: none;
       border-radius: 8px;
     }
+
+    /* Kehillah Schedule Styles */
+    #scheduleSection {
+      margin-top: 40px;
+      padding: 20px;
+      background-color: #f0f4f8;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #scheduleSection h2 {
+      font-size: 24px;
+      color: #333;
+      margin-bottom: 20px;
+    }
+    #scheduleSection table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    #scheduleSection th, #scheduleSection td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    #scheduleSection th {
+      background-color: #2196f3;
+      color: white;
+    }
+    #scheduleSection tr:hover {
+      background-color: #e3f2fd;
+    }
+
+    footer {
+      margin-top: 40px;
+      font-size: 14px;
+      color: #555;
+    }
   </style>
 </head>
 <body>
@@ -113,7 +153,29 @@
       <button id="btnBasket">Play Basketball Stars</button>
       <button id="btnTetris">Play Tetris</button>
     </div>
-    <footer style="margin-top:40px; font-size:14px; color:#555;">Made by Arlo</footer>
+
+    <!-- Kehillah School Class Schedule -->
+    <div id="scheduleSection">
+      <h2>Kehillah School Class Schedule</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Block</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Block 1</td><td>8:30 AM – 9:50 AM</td></tr>
+          <tr><td>Block 2</td><td>9:55 AM – 11:15 AM</td></tr>
+          <tr><td>Block 3</td><td>11:20 AM – 12:40 PM</td></tr>
+          <tr><td>Lunch</td><td>12:40 PM – 1:20 PM</td></tr>
+          <tr><td>Block 4</td><td>1:25 PM – 2:45 PM</td></tr>
+          <tr><td>Block 5</td><td>2:50 PM – 4:10 PM</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <footer>Made by Arlo</footer>
   </div>
 
   <!-- CLASH ROYALE PAGE -->
@@ -192,210 +254,4 @@
   document.getElementById('btnBasket').addEventListener('click', () => showPage('basket'));
   document.getElementById('btnTetris').addEventListener('click', () => showPage('tetris'));
 
-  // Back buttons
-  document.getElementById('backClash').addEventListener('click', () => {
-    showPage('home');
-    resetClashGame();
-  });
-  document.getElementById('backFlappy').addEventListener('click', () => showPage('home'));
-  document.getElementById('backSubway').addEventListener('click', () => showPage('home'));
-  document.getElementById('backBlock').addEventListener('click', () => showPage('home'));
-  document.getElementById('backBasket').addEventListener('click', () => showPage('home'));
-  document.getElementById('backTetris').addEventListener('click', () => showPage('home'));
-
-  function showPage(pageName) {
-    homePage.classList.remove('active');
-    clashPage.classList.remove('active');
-    flappyPage.classList.remove('active');
-    subwayPage.classList.remove('active');
-    blockPage.classList.remove('active');
-    basketPage.classList.remove('active');
-    tetrisPage.classList.remove('active');
-    if (pageName === 'home') homePage.classList.add('active');
-    else if (pageName === 'clash') clashPage.classList.add('active');
-    else if (pageName === 'flappy') flappyPage.classList.add('active');
-    else if (pageName === 'subway') subwayPage.classList.add('active');
-    else if (pageName === 'block') blockPage.classList.add('active');
-    else if (pageName === 'basket') basketPage.classList.add('active');
-    else if (pageName === 'tetris') tetrisPage.classList.add('active');
-  }
-
-  // ----------------------------
-  // Clash Royale Game Code
-  // ----------------------------
-
-  const playerTower = { hp: 10 };
-  const enemyTower = { hp: 10 };
-  let playerUnits = [];
-  let enemyUnits = [];
-  let playerElixir = 10;
-  const maxElixir = 10;
-  const statusDiv = document.getElementById('status');
-  const messageDiv = document.getElementById('message');
-  let gameOver = false;
-  let elixirInterval, enemySpawnInterval, moveInterval;
-
-  function updateStatus() {
-    statusDiv.textContent = `Player Tower HP: ${playerTower.hp} | Enemy Tower HP: ${enemyTower.hp} | Elixir: ${playerElixir}`;
-  }
-
-  function createUnit(level, side) {
-    const unit = document.createElement('div');
-    unit.classList.add('unit');
-    if (side === 'enemy') unit.style.background = '#4caf50';
-
-    unit.style.bottom = '120px';
-    if (side === 'player') unit.style.left = '70px';
-    else unit.style.right = '70px';
-
-    unit.textContent = `Lv${level}`;
-    unit.side = side;
-    unit.hp = [0,3,5,8][level] || 3;
-    unit.level = level;
-    return unit;
-  }
-
-  function moveUnits() {
-    if (gameOver) return;
-
-    playerUnits.forEach((unit, i) => {
-      if (!unit.style.left) unit.style.left = '70px';
-      const currentLeft = parseInt(unit.style.left);
-      if (currentLeft >= 350) {
-        enemyTower.hp--;
-        removeUnit(unit, 'player', i);
-        checkGameOver();
-        updateStatus();
-        return;
-      }
-      unit.style.left = currentLeft + 1 + 'px';
-    });
-
-    enemyUnits.forEach((unit, i) => {
-      if (!unit.style.right) unit.style.right = '70px';
-      const currentRight = parseInt(unit.style.right);
-      if (currentRight >= 350) {
-        playerTower.hp--;
-        removeUnit(unit, 'enemy', i);
-        checkGameOver();
-        updateStatus();
-        return;
-      }
-      unit.style.right = currentRight + 1 + 'px';
-    });
-
-    // Combat
-    for (let i = playerUnits.length - 1; i >= 0; i--) {
-      const pUnit = playerUnits[i];
-      const pPos = parseInt(pUnit.style.left);
-      for (let j = enemyUnits.length -1; j >= 0; j--) {
-        const eUnit = enemyUnits[j];
-        const ePos = 400 - parseInt(eUnit.style.right);
-        if (Math.abs(pPos - ePos) < 30) {
-          pUnit.hp--;
-          eUnit.hp--;
-          if (pUnit.hp <= 0) removeUnit(pUnit, 'player', i);
-          if (eUnit.hp <= 0) removeUnit(eUnit, 'enemy', j);
-          updateStatus();
-          break;
-        }
-      }
-    }
-  }
-
-  function removeUnit(unit, side, index) {
-    if (side === 'player') {
-      if (playerUnits[index] === unit) {
-        playerUnits.splice(index, 1);
-        unit.remove();
-      }
-    } else {
-      if (enemyUnits[index] === unit) {
-        enemyUnits.splice(index, 1);
-        unit.remove();
-      }
-    }
-  }
-
-  function spawnPlayerUnit(level, cost) {
-    if (gameOver) return;
-    if (playerElixir >= cost) {
-      const unit = createUnit(level, 'player');
-      playerUnits.push(unit);
-      document.getElementById('playerUnits').appendChild(unit);
-      playerElixir -= cost;
-      updateStatus();
-    } else {
-      alert('Not enough Elixir!');
-    }
-  }
-
-  function spawnEnemyUnit() {
-    if (gameOver) return;
-    const level = Math.floor(Math.random() * 3) + 1;
-    const unit = createUnit(level, 'enemy');
-    enemyUnits.push(unit);
-    document.getElementById('enemyUnits').appendChild(unit);
-  }
-
-  function checkGameOver() {
-    if (playerTower.hp <= 0) {
-      messageDiv.textContent = 'You Lose!';
-      gameOver = true;
-      stopGameLoops();
-    }
-    if (enemyTower.hp <= 0) {
-      messageDiv.textContent = 'You Win!';
-      gameOver = true;
-      stopGameLoops();
-    }
-  }
-
-  function regenElixir() {
-    if (gameOver) return;
-    if (playerElixir < maxElixir) {
-      playerElixir++;
-      updateStatus();
-    }
-  }
-
-  // Game loops
-  function startClashGame() {
-    resetClashGame();
-    elixirInterval = setInterval(regenElixir, 1500);
-    enemySpawnInterval = setInterval(spawnEnemyUnit, 4000);
-    moveInterval = setInterval(moveUnits, 30);
-  }
-  function stopGameLoops() {
-    clearInterval(elixirInterval);
-    clearInterval(enemySpawnInterval);
-    clearInterval(moveInterval);
-  }
-  function resetClashGame() {
-    stopGameLoops();
-    playerTower.hp = 10;
-    enemyTower.hp = 10;
-    playerElixir = maxElixir;
-    playerUnits.forEach(u => u.remove());
-    enemyUnits.forEach(u => u.remove());
-    playerUnits = [];
-    enemyUnits = [];
-    messageDiv.textContent = '';
-    updateStatus();
-    gameOver = false;
-  }
-
-  // Add listeners to troop buttons
-  document.querySelectorAll('#controls button[data-type]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const level = parseInt(btn.getAttribute('data-type'));
-      const cost = parseInt(btn.getAttribute('data-cost'));
-      spawnPlayerUnit(level, cost);
-    });
-  });
-
-</script>
-
-</body>
-</html>
-
+  //
