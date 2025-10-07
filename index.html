@@ -78,7 +78,7 @@
       background: #90caf9;
       cursor: not-allowed;
     }
-    #backBtn {
+    #backClash, #backFlappy, #backSubway, #backBlock, #backBasket {
       background: #f44336;
     }
     #status {
@@ -106,9 +106,11 @@
   <div id="homePage" class="page active">
     <h1>Welcome to Arlo's Game Hub</h1>
     <div id="gameList">
-      <button id="btnClash">Play Clash Royale Mini-Game</button>
+      <button id="btnClash">Play Clash Royale Mini‑Game</button>
       <button id="btnFlappy">Play Flappy Bird</button>
-      <!-- You can add more game options here -->
+      <button id="btnSubway">Play Subway Surfers</button>
+      <button id="btnBlock">Play Block Blast</button>
+      <button id="btnBasket">Play Basketball Stars</button>
     </div>
   </div>
 
@@ -122,15 +124,13 @@
       <div id="playerUnits"></div>
       <div id="enemyUnits"></div>
     </div>
-
     <div id="controls">
-      <button data-type="1" data-cost="3" data-hp="3">Spawn Troop Lv1 (3 Elixir)</button>
-      <button data-type="2" data-cost="5" data-hp="5">Spawn Troop Lv2 (5 Elixir)</button>
-      <button data-type="3" data-cost="7" data-hp="8">Spawn Troop Lv3 (7 Elixir)</button>
+      <button data-type="1" data-cost="3">Spawn Troop Lv1 (3 Elixir)</button>
+      <button data-type="2" data-cost="5">Spawn Troop Lv2 (5 Elixir)</button>
+      <button data-type="3" data-cost="7">Spawn Troop Lv3 (7 Elixir)</button>
       <br />
       <button id="backClash">← Back to Home</button>
     </div>
-
     <div id="status">Player Tower HP: 10 | Enemy Tower HP: 10 | Elixir: 10</div>
   </div>
 
@@ -141,53 +141,83 @@
     <button id="backFlappy">← Back to Home</button>
   </div>
 
+  <!-- SUBWAY SURFERS PAGE -->
+  <div id="subwayPage" class="page">
+    <h1>Subway Surfers</h1>
+    <iframe src="https://subwaysurfers.io/"></iframe>
+    <button id="backSubway">← Back to Home</button>
+  </div>
+
+  <!-- BLOCK BLAST PAGE -->
+  <div id="blockPage" class="page">
+    <h1>Block Blast</h1>
+    <iframe src="https://blockblast.io/"></iframe>
+    <button id="backBlock">← Back to Home</button>
+  </div>
+
+  <!-- BASKETBALL STARS PAGE -->
+  <div id="basketPage" class="page">
+    <h1>Basketball Stars</h1>
+    <iframe src="https://basketballstars.io/"></iframe>
+    <button id="backBasket">← Back to Home</button>
+  </div>
+
 <script>
   // Page elements
   const homePage = document.getElementById('homePage');
   const clashPage = document.getElementById('clashPage');
   const flappyPage = document.getElementById('flappyPage');
+  const subwayPage = document.getElementById('subwayPage');
+  const blockPage = document.getElementById('blockPage');
+  const basketPage = document.getElementById('basketPage');
 
-  // Buttons to navigate
+  // Buttons to open pages
   document.getElementById('btnClash').addEventListener('click', () => {
     showPage('clash');
     startClashGame();
   });
-  document.getElementById('btnFlappy').addEventListener('click', () => {
-    showPage('flappy');
-  });
+  document.getElementById('btnFlappy').addEventListener('click', () => showPage('flappy'));
+  document.getElementById('btnSubway').addEventListener('click', () => showPage('subway'));
+  document.getElementById('btnBlock').addEventListener('click', () => showPage('block'));
+  document.getElementById('btnBasket').addEventListener('click', () => showPage('basket'));
+
+  // Back buttons
   document.getElementById('backClash').addEventListener('click', () => {
     showPage('home');
     resetClashGame();
   });
-  document.getElementById('backFlappy').addEventListener('click', () => {
-    showPage('home');
-  });
+  document.getElementById('backFlappy').addEventListener('click', () => showPage('home'));
+  document.getElementById('backSubway').addEventListener('click', () => showPage('home'));
+  document.getElementById('backBlock').addEventListener('click', () => showPage('home'));
+  document.getElementById('backBasket').addEventListener('click', () => showPage('home'));
 
   function showPage(pageName) {
     homePage.classList.remove('active');
     clashPage.classList.remove('active');
     flappyPage.classList.remove('active');
+    subwayPage.classList.remove('active');
+    blockPage.classList.remove('active');
+    basketPage.classList.remove('active');
     if (pageName === 'home') homePage.classList.add('active');
     else if (pageName === 'clash') clashPage.classList.add('active');
     else if (pageName === 'flappy') flappyPage.classList.add('active');
+    else if (pageName === 'subway') subwayPage.classList.add('active');
+    else if (pageName === 'block') blockPage.classList.add('active');
+    else if (pageName === 'basket') basketPage.classList.add('active');
   }
 
-  // --- Clash Royale Game Code (same as before) ---
+  // ----------------------------
+  // Clash Royale Game Code
+  // ----------------------------
 
-  const playerTower = { hp: 10, element: document.getElementById('playerTower') };
-  const enemyTower = { hp: 10, element: document.getElementById('enemyTower') };
-  const playerUnitsDiv = document.getElementById('playerUnits');
-  const enemyUnitsDiv = document.getElementById('enemyUnits');
-
+  const playerTower = { hp: 10 };
+  const enemyTower = { hp: 10 };
   let playerUnits = [];
   let enemyUnits = [];
-
   let playerElixir = 10;
   const maxElixir = 10;
-
   const statusDiv = document.getElementById('status');
   const messageDiv = document.getElementById('message');
-
   let gameOver = false;
   let elixirInterval, enemySpawnInterval, moveInterval;
 
@@ -275,7 +305,7 @@
     if (playerElixir >= cost) {
       const unit = createUnit(level, 'player');
       playerUnits.push(unit);
-      playerUnitsDiv.appendChild(unit);
+      document.getElementById('playerUnits').appendChild(unit);
       playerElixir -= cost;
       updateStatus();
     } else {
@@ -288,11 +318,10 @@
     const level = Math.floor(Math.random() * 3) + 1;
     const unit = createUnit(level, 'enemy');
     enemyUnits.push(unit);
-    enemyUnitsDiv.appendChild(unit);
+    document.getElementById('enemyUnits').appendChild(unit);
   }
 
   function startClashGame() {
-    // Reset game variables
     playerTower.hp = 10;
     enemyTower.hp = 10;
     playerElixir = 10;
@@ -300,7 +329,6 @@
     messageDiv.textContent = '';
     updateStatus();
 
-    // Remove old units if any
     playerUnits.forEach(u => u.remove());
     enemyUnits.forEach(u => u.remove());
     playerUnits = [];
@@ -316,13 +344,8 @@
       }
     }, 1000);
 
-    enemySpawnInterval = setInterval(() => {
-      spawnEnemyUnit();
-    }, 3000);
-
-    moveInterval = setInterval(() => {
-      moveUnits();
-    }, 30);
+    enemySpawnInterval = setInterval(spawnEnemyUnit, 3000);
+    moveInterval = setInterval(moveUnits, 30);
   }
 
   function resetClashGame() {
